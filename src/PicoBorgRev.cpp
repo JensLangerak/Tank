@@ -33,8 +33,16 @@ int PicoBorgRevInitialise(bool trOtherBus)
 	snprintf(pathI2C, sizeof(pathI2C)-1, "/dev/i2c-%d", busNumber);
 	hI2C = open(pathI2C, O_RDWR);
 	if (hI2C < 0) {
-		printf("I2C ERROR: Failed to open bus %d, are we root?\n", busNumber);
-		return I2C_ERROR_FAILED;
+		printf("I2C ERROR: Failed to open bus %d, ", busNumber);
+		if (trOtherBus) {
+			// 1 or 0
+			busNumber = 1 - busNumber;
+			printf("Trying bus %d \n", busNumber);
+			PicoBorgRevInitialise(false);
+		} else {
+			printf("are we root?\n");
+			return I2C_ERROR_FAILED;
+		}
 	}
 }
 

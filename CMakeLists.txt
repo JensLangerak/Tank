@@ -189,6 +189,6 @@ include_directories(
 # catkin_add_nosetests(test)
 #link_directories(/usr/local/lib)
 #add_executable(mover src/mover.cpp)
-add_executable(test src/PicoBorgReverse.cpp)
-target_link_libraries(test ${catkin_LIBRARIES} pthread linux/i2)
+add_executable(picoBorgRev src/PicoBorgRev.cpp)
+target_link_libraries(picoBorgRev ${catkin_LIBRARIES} pthread)
 #add_definitions(-lwiringPi)
