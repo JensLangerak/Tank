@@ -67,6 +67,10 @@
 #define PBR_MAXIMUM_I2C_ADDRESS     (0x77)  // Maximum allowed value for the I2C address
 
 
+int PicoBorgRevInit(void);
+int PicoBorgRevInitialise(bool tryOtherBus);
+void PicoBorgShutdown(void);
+
 /***************************************/
 /***** PicoBorg Reverse Properties *****/
 /***************************************/
@@ -75,6 +79,8 @@
 typedef unsigned char byte;                 // Define the term 'byte' if it has not been already
 
 // Values
+extern int busNumber;
+extern bool pbrFound;
 extern byte pbrAddress;                     // The I2C address we are currently talking to
 
 /**************************************/
