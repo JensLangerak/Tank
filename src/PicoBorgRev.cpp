@@ -44,9 +44,80 @@ int PicoBorgRevInitialise(bool trOtherBus)
 			return I2C_ERROR_FAILED;
 		}
 	}
+	return PbrScanForAddress(0);
 }
+
+uint8_t PbrScanForAddress(uint8_t index)
+{
+	uint8_t found = 0;
+	uint8_t oldAddress = pbrAddress;
+	for (pbrAddress = PBR_MINIMUM_I2C_ADDRESS; pbrAddress <= PBR_MAXIMUM_I2C_ADDRESS; pbrAddress++) {
+		if (PbrCheckId()) {
+			if (index <= 0) {
+				found = pbrAddress;
+				break;
+			} else {
+				index--;
+			}
+		}
+	}
+	pbrAddress = oldAddress;
+	return found;
+
+}
+
+bool PbrCheckId(void)
+{
+	SetTargetI2C(hI2C, pbrAddress);
+	bufOut[0] = PBR_COMMAND_GET_ID;
+	if (SendI2C(hI2C, 1, bufOut) == I2C_ERROR_OK) {
+	       if (RecI2C(hI2C, 1, bufIn) == I2C_ERROR_OK) {
+		       return (bufIn[1] == PBR_I2C_ID_PICOBORG_REV);
+	      }
+	}
+	printf("ERROR\n");
+	return false;
+
+}
+
+int SetTargetI2C(int hI2C, uint8_t targetAddress)
+{
+	 if (ioctl(hI2C, I2C_SLAVE, targetAddress) < 0) {
+		printf("I2C ERROR: Failed to set target address to %d!\n", targetAddress);
+		return 1;
+	}
+	return 0;
+}
+
+int SendI2C(int hI2C, int bytes, uint8_t *pData)
+{
+	int rc = write(hI2C, pData, bytes);
+	if (rc == bytes) {
+		return I2C_ERROR_OK;
+	} else if (rc < 0) {
+		printf("I2C ERROR: Failed to send %d bytes!\n", bytes);
+		return I2C_ERROR_FAILED;
+	} else {
+		printf("I2C ERROR: Only sent %d of %d bytes!\n", rc, bytes);
+		return I2C_ERROR_PARTIAL;
+	}
+}
+
+int RecI2C(int hI2C, int bytes, uint8_t *pData) {
+	int rc = read(hI2C, pData, bytes);
+	if (rc == bytes) {
+		return I2C_ERROR_OK;
+	} else if (rc < 0) {
+		printf("I2C ERROR: Failed to read %d bytes!\n", bytes);
+		return I2C_ERROR_FAILED;
+	} else {
+		printf("I2C ERROR: Only read %d of %d bytes!\n", rc, bytes);
+		return I2C_ERROR_PARTIAL;
+	}
+}
+
 
 int main(int argc, char **argv)
 {
-	PicoBorgRevInitialise(true);
+	printf("PicoBorgRev found on: %d \n", PicoBorgRevInitialise(true));
 }

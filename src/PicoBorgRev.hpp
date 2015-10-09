@@ -1,5 +1,7 @@
 #ifndef PICOBORGREV_HPP
 #define PICOBORGREV_HPP
+#include <stdint.h>
+#include <unistd.h>
 
 /**
  * Based on the arduino file for PicoBorgRev:
@@ -76,12 +78,16 @@ void PicoBorgShutdown(void);
 /***************************************/
 
 // Types
-typedef unsigned char byte;                 // Define the term 'byte' if it has not been already
+//typedef unsigned char byte;                 // Define the term 'byte' if it has not been already
 
 // Values
 extern int busNumber;
 extern bool pbrFound;
-extern byte pbrAddress;                     // The I2C address we are currently talking to
+extern uint8_t pbrAddress;                     // The I2C address we are currently talking to
+
+int SetTargetI2C(int hI2C, uint8_t targetAddress);
+int SendI2C(int hI2C, int bytes, uint8_t *pData);
+int RecI2C(int hI2C, int bytes, uint8_t *pData);
 
 /**************************************/
 /***** PicoBorg Reverse Functions *****/
@@ -169,16 +175,16 @@ bool PbrGetDriveFault(void);
 /***** Advanced functions *****/
 
 // Scans the I2C bus for PicoBorg Reverse boards and returns a count of all the boards found
-byte PbrScanForCount(void);
+uint8_t PbrScanForCount(void);
 
 // Scans the I2C bus for a PicoBorg Reverse board, index is which address to return (from 0 to count - 1)
 // Returns address 0 if no board is found for that index
-byte PbrScanForAddress(byte index);
+uint8_t PbrScanForAddress(uint8_t index);
 
 // Sets the PicoBorg Reverse at the current address to newAddress
 // Warning, this new I²C address will still be used after resetting the power on the device
 // If successful returns true and updates pbrAddress, otherwise returns false
-bool PbrSetNewAddress(byte newAddress);
+bool PbrSetNewAddress(uint8_t newAddress);
 
 
 #endif /* PICOBORGREV_HPP */
