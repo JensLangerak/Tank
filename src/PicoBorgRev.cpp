@@ -7,6 +7,15 @@
 #include <unistd.h>
 #include <inttypes.h>
 
+
+#include <errno.h>
+#include <string.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
+
 ///// Storage /////
 uint8_t bufIn[BUFFER_MAX];
 uint8_t bufOut[BUFFER_MAX];
@@ -71,7 +80,9 @@ bool PbrCheckId(void)
 	SetTargetI2C(hI2C, pbrAddress);
 	bufOut[0] = PBR_COMMAND_GET_ID;
 	if (SendI2C(hI2C, 1, bufOut) == I2C_ERROR_OK) {
-	       if (RecI2C(hI2C, 1, bufIn) == I2C_ERROR_OK) {
+		printf("Send to address 0x%02x\n", pbrAddress);
+	       if (RecI2C(hI2C, 2, bufIn) == I2C_ERROR_OK) {
+		printf("Recieved message: 0x%02x\n", bufIn[1]);
 		       return (bufIn[1] == PBR_I2C_ID_PICOBORG_REV);
 	      }
 	}
@@ -96,6 +107,8 @@ int SendI2C(int hI2C, int bytes, uint8_t *pData)
 		return I2C_ERROR_OK;
 	} else if (rc < 0) {
 		printf("I2C ERROR: Failed to send %d bytes!\n", bytes);
+    printf("Error: %d", errno);
+        printf("\n\n");
 		return I2C_ERROR_FAILED;
 	} else {
 		printf("I2C ERROR: Only sent %d of %d bytes!\n", rc, bytes);
@@ -119,5 +132,5 @@ int RecI2C(int hI2C, int bytes, uint8_t *pData) {
 
 int main(int argc, char **argv)
 {
-	printf("PicoBorgRev found on: %d \n", PicoBorgRevInitialise(true));
+	printf("PicoBorgRev found on: 0x%02x \n", PicoBorgRevInitialise(true));
 }
