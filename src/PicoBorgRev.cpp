@@ -15,6 +15,8 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
+#include "I2CCommunicator.hpp"
+
 
 ///// Storage /////
 uint8_t bufIn[BUFFER_MAX];
@@ -132,5 +134,7 @@ int RecI2C(int hI2C, int bytes, uint8_t *pData) {
 
 int main(int argc, char **argv)
 {
-	printf("PicoBorgRev found on: 0x%02x \n", PicoBorgRevInitialise(true));
+	//printf("PicoBorgRev found on: 0x%02x \n", PicoBorgRevInitialise(true));
+	I2CCommunicator * com = new I2CCommunicator(); 
+	delete com;
 }
