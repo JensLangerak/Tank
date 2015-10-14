@@ -2,6 +2,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include "I2CCommunicator.hpp"
+#include "I2CException.hpp"
 #include <inttypes.h>
 #include <linux/i2c-dev.h>
 #include <linux/i2c.h>
@@ -62,12 +63,16 @@ bool PicoBorgRev::checkId(I2CCommunicator *communicator, uint8_t pbrAddress)
 	uint8_t bufOut[BUFFER_MAX];
 	uint8_t bufIn[BUFFER_MAX];
 	bufOut[0] = PBR_COMMAND_GET_ID;
-	if (communicator->send(bufOut, 1)  == I2C_ERROR_OK) {
-		printf("Send to address 0x%02x\n", pbrAddress);
-		if (communicator->rec(bufIn, 2) == I2C_ERROR_OK) {
-			printf("Recieved message: 0x%02x\n", bufIn[1]);
-			return (bufIn[1] == PBR_I2C_ID_PICOBORG_REV);
-	      }
+	try {
+		if (communicator->send(bufOut, 1)  == I2C_ERROR_OK) {
+			printf("Send to address 0x%02x\n", pbrAddress);
+			if (communicator->rec(bufIn, 2) == I2C_ERROR_OK) {
+				printf("Recieved message: 0x%02x\n", bufIn[1]);
+				return (bufIn[1] == PBR_I2C_ID_PICOBORG_REV);
+		      }
+		}
+	} catch (const I2CException& e) {	
+
 	}
 	printf("Board not a pbr\n");
 	return false;
