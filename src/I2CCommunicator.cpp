@@ -87,8 +87,8 @@ int I2CCommunicator::rec(uint8_t *pData, int bytes) {
 	}
 }
 
-int main(int arg, char ** argv)
+int I2CCommunicator::getBusnumber()
 {
-	I2CCommunicator * com = new I2CCommunicator();
-	delete com;
+	return busNumber;
 }
+

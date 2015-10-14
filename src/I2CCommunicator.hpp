@@ -14,8 +14,6 @@
 class I2CCommunicator {
 	protected:
 		int hI2C = HANDLE_UNINITALISED;
-		uint8_t bufIn[BUFFER_MAX];
-		uint8_t bufOut[BUFFER_MAX];
 
 		int busNumber;
 
@@ -35,6 +33,11 @@ class I2CCommunicator {
 		 * @throws I2CException when it fails to create this object.
 		 */
 		I2CCommunicator(int busNumber=1, bool tryOtherBus = true);
+
+		/**
+		 * Return the selected busnumber.
+		 */
+		int getBusnumber(void);
 
 		/**
 		 * Set a target to communicate with.
@@ -67,7 +70,5 @@ class I2CCommunicator {
 		 * @throws I2CException when it fails to recieve the data.
 		 */
 		int rec(uint8_t *pData, int bytes);
-#endif /* I2CCOMUNICATOR_HPP */
-
-
 };
+#endif /* I2CCOMUNICATOR_HPP */

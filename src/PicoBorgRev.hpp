@@ -2,18 +2,12 @@
 #define PICOBORGREV_HPP
 #include <stdint.h>
 #include <unistd.h>
+#include "I2CCommunicator.hpp"
 
 /**
  * Based on the arduino file for PicoBorgRev:
  * https://www.piborg.org/downloads/picoborgrev/PicoBorgRevArduino.zip
  */
-
-#define BUFFER_MAX              (32)
-#define I2C_ERROR_OK            (0)
-#define I2C_ERROR_FAILED        (1)
-#define I2C_ERROR_PARTIAL       (2)
-#define HANDLE_UNINITALISED     (-1)
-
 
 // Commands
 // GET commands sent should be followed by a read for the result
@@ -69,122 +63,116 @@
 #define PBR_MAXIMUM_I2C_ADDRESS     (0x77)  // Maximum allowed value for the I2C address
 
 
-int PicoBorgRevInit(void);
-int PicoBorgRevInitialise(bool tryOtherBus);
-void PicoBorgShutdown(void);
+class PicoBorgRev {
+	protected:
+		I2CCommunicator *communicator;
+		uint8_t pbrAddress;
+		uint8_t bufIn[BUFFER_MAX];
+		uint8_t bufOut[BUFFER_MAX];
 
-/***************************************/
-/***** PicoBorg Reverse Properties *****/
-/***************************************/
+	public:
+		PicoBorgRev(I2CCommunicator *communicator, uint8_t pbrAddress);
 
-// Types
-//typedef unsigned char byte;                 // Define the term 'byte' if it has not been already
-
-// Values
-extern int busNumber;
-extern bool pbrFound;
-extern uint8_t pbrAddress;                     // The I2C address we are currently talking to
-
-int SetTargetI2C(int hI2C, uint8_t targetAddress);
-int SendI2C(int hI2C, int bytes, uint8_t *pData);
-int RecI2C(int hI2C, int bytes, uint8_t *pData);
-
-/**************************************/
-/***** PicoBorg Reverse Functions *****/
-/**************************************/
-// All motor drive levels are from +PBR_PWM_MAX to -PBR_PWM_MAX
-// Positive values indicate forwards motion
-// Negative values indicate reverse motion
-// 0 indicates stationary
-// Values outside PBR_PWM_MAX will be capped to PBR_PWM_MAX (100%)
+		/**************************************/
+		/***** PicoBorg Reverse Functions *****/
+		/**************************************/
+		/**
+		 * All motor drive levels are from +PBR_PWM_MAX to -PBR_PWM_MAX
+		 * Positive values indicate forwards motion
+		 * Negative values indicate reverse motion
+		 * 0 indicates stationary
+		 * Values outside PBR_PWM_MAX will be capped to PBR_PWM_MAX (100%)
+		 */
 
 
-/***** Motor functions *****/
+		/***** Motor functions *****/
 
-// Sets the drive level for motor 2
-void PbrSetMotor2(int power);
+		// Sets the drive level for motor 2
+		void PbrSetMotor2(int power);
 
-// Gets the drive level for motor 2
-int PbrGetMotor2(void);
+		// Gets the drive level for motor 2
+		int PbrGetMotor2(void);
 
-// Sets the drive level for motor 1
-void PbrSetMotor1(int power);
+		// Sets the drive level for motor 1
+		void PbrSetMotor1(int power);
 
-// Gets the drive level for motor 1
-int PbrGetMotor1(void);
+		// Gets the drive level for motor 1
+		int PbrGetMotor1(void);
 
-// Sets the drive level for all motors
-void PbrSetMotors(int power);
+		// Sets the drive level for all motors
+		void PbrSetMotors(int power);
 
-// Sets all motors to stopped, useful when ending a program
-void PbrMotorsOff(void);
+		// Sets all motors to stopped, useful when ending a program
+		void PbrMotorsOff(void);
 
-/***** General functions *****/
+		/***** General functions *****/
 
-// Reads the board identifier and checks it is a PicoBorg Reverse, false for incorrect, true for correct
-bool PbrCheckId(void);
+		// Reads the board identifier and checks it is a PicoBorg Reverse, false for incorrect, true for correct
+		static bool checkId(I2CCommunicator *communicator, uint8_t pbrAddress);
 
-// Sets the current state of the LED, false for off, true for on
-void PbrSetLed(bool state);
+		// Sets the current state of the LED, false for off, true for on
+		void PbrSetLed(bool state);
 
-// Reads the current state of the LED, false for off, true for on
-bool PbrGetLed(void);
+		// Reads the current state of the LED, false for off, true for on
+		bool PbrGetLed(void);
 
-// Resets the EPO latch state, use to allow movement again after the EPO has been tripped
-void PbrResetEpo(void);
 
-// Reads the system EPO latch state.
-// If false the EPO has not been tripped, and movement is allowed.
-// If true the EPO has been tripped, movement is disabled if the EPO is not ignored (see PbrSetEpoIgnore)
-//     Movement can be re-enabled by calling PbrResetEpo. 
-bool PbrGetEpo(void);
+		// Resets the EPO latch state, use to allow movement again after the EPO has been tripped
+		void PbrResetEpo(void);
 
-// Sets the system to ignore or use the EPO latch, set to false if you have an EPO switch, true if you do not
-void PbrSetEpoIgnore(bool state);
+		// Reads the system EPO latch state.
+		// If false the EPO has not been tripped, and movement is allowed.
+		// If true the EPO has been tripped, movement is disabled if the EPO is not ignored (see PbrSetEpoIgnore)
+		//     Movement can be re-enabled by calling PbrResetEpo. 
+		bool PbrGetEpo(void);
 
-// Reads the system EPO ignore state, False for using the EPO latch, True for ignoring the EPO latch
-bool PbrGetEpoIgnore(void);
+		// Sets the system to ignore or use the EPO latch, set to false if you have an EPO switch, true if you do not
+		void PbrSetEpoIgnore(bool state);
 
-// Sets the system to enable or disable the communications failsafe
-// The failsafe will turn the motors off unless it is commanded at least once every 1/4 of a second
-// Set to True to enable this failsafe, set to False to disable this failsafe
-// The failsafe is disabled at power on
-void PbrSetCommsFailsafe(bool state);
+		// Reads the system EPO ignore state, False for using the EPO latch, True for ignoring the EPO latch
+		bool PbrGetEpoIgnore(void);
 
-// Read the current system state of the communications failsafe, true for enabled, false for disabled
-// The failsafe will turn the motors off unless it is commanded at least once every 1/4 of a second
-bool PbrGetCommsFailsafe(void);
+		// Sets the system to enable or disable the communications failsafe
+		// The failsafe will turn the motors off unless it is commanded at least once every 1/4 of a second
+		// Set to True to enable this failsafe, set to False to disable this failsafe
+		// The failsafe is disabled at power on
+		void PbrSetCommsFailsafe(bool state);
 
-// Reads the system drive fault state, False for no problems, True for a fault has been detected
-// Faults may indicate power problems, such as under-voltage (not enough power), and may be cleared by setting a lower drive power
-// If a fault is persistent, it repeatably occurs when trying to control the board, this may indicate a wiring problem such as:
-//     * The supply is not powerful enough for the motors
-//         The board has a bare minimum requirement of 6V to operate correctly
-//         A recommended minimum supply of 7.2V should be sufficient for smaller motors
-//     * The + and - connections for either motor are connected to each other
-//     * Either + or - is connected to ground (GND, also known as 0V or earth)
-//     * Either + or - is connected to the power supply (V+, directly to the battery or power pack)
-//     * One of the motors may be damaged
-// Faults will self-clear, they do not need to be reset, however some faults require both motors to be moving at less than 100% to clear
-// The easiest way to check is to put both motors at a low power setting which is high enough for them to rotate easily, such as 30%
-// Note that the fault state may be true at power up, this is normal and should clear when both motors have been driven
-// If there are no faults but you cannot make your motors move check PbrGetEpo to see if the safety switch has been tripped
-// For more details check the website at www.piborg.org/picoborgrev and double check the wiring instructions
-bool PbrGetDriveFault(void);
+		// Read the current system state of the communications failsafe, true for enabled, false for disabled
+		// The failsafe will turn the motors off unless it is commanded at least once every 1/4 of a second
+		bool PbrGetCommsFailsafe(void);
 
-/***** Advanced functions *****/
+		// Reads the system drive fault state, False for no problems, True for a fault has been detected
+		// Faults may indicate power problems, such as under-voltage (not enough power), and may be cleared by setting a lower drive power
+		// If a fault is persistent, it repeatably occurs when trying to control the board, this may indicate a wiring problem such as:
+		//     * The supply is not powerful enough for the motors
+		//         The board has a bare minimum requirement of 6V to operate correctly
+		//         A recommended minimum supply of 7.2V should be sufficient for smaller motors
+		//     * The + and - connections for either motor are connected to each other
+		//     * Either + or - is connected to ground (GND, also known as 0V or earth)
+		//     * Either + or - is connected to the power supply (V+, directly to the battery or power pack)
+		//     * One of the motors may be damaged
+		// Faults will self-clear, they do not need to be reset, however some faults require both motors to be moving at less than 100% to clear
+		// The easiest way to check is to put both motors at a low power setting which is high enough for them to rotate easily, such as 30%
+		// Note that the fault state may be true at power up, this is normal and should clear when both motors have been driven
+		// If there are no faults but you cannot make your motors move check PbrGetEpo to see if the safety switch has been tripped
+		// For more details check the website at www.piborg.org/picoborgrev and double check the wiring instructions
+		bool PbrGetDriveFault(void);
 
-// Scans the I2C bus for PicoBorg Reverse boards and returns a count of all the boards found
-uint8_t PbrScanForCount(void);
+		/***** Advanced functions *****/
 
-// Scans the I2C bus for a PicoBorg Reverse board, index is which address to return (from 0 to count - 1)
-// Returns address 0 if no board is found for that index
-uint8_t PbrScanForAddress(uint8_t index);
+		// Scans the I2C bus for PicoBorg Reverse boards and returns a count of all the boards found
+		static uint8_t PbrScanForCount(void);
 
-// Sets the PicoBorg Reverse at the current address to newAddress
-// Warning, this new I²C address will still be used after resetting the power on the device
-// If successful returns true and updates pbrAddress, otherwise returns false
-bool PbrSetNewAddress(uint8_t newAddress);
+		// Scans the I2C bus for a PicoBorg Reverse board, index is which address to return (from 0 to count - 1)
+		// Returns address 0 if no board is found for that index
+		static uint8_t scanForAddress(uint8_t index, I2CCommunicator *communicator);
 
+		// Sets the PicoBorg Reverse at the current address to newAddress
+		// Warning, this new I²C address will still be used after resetting the power on the device
+		// If successful returns true and updates pbrAddress, otherwise returns false
+		bool PbrSetNewAddress(uint8_t newAddress);
+
+};
 
 #endif /* PICOBORGREV_HPP */

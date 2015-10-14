@@ -6,7 +6,7 @@
 #include <string>
 
 class I2CException : public std::exception
-{;
+{
 	private:
 		std::string errMsg;
 	public:
