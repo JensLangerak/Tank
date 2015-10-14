@@ -22,7 +22,7 @@
 PicoBorgRev::PicoBorgRev(I2CCommunicator *communicator, uint8_t pbrAddress)
 {
 	if (PicoBorgRev::checkId(communicator, pbrAddress)) {
-		printf("PBR board found\n");
+		printf("PBR board found on 0x%02x\n", pbrAddress);
 		this->communicator = communicator;
 		this->pbrAddress = pbrAddress;
 		
@@ -34,7 +34,7 @@ PicoBorgRev::PicoBorgRev(I2CCommunicator *communicator, uint8_t pbrAddress)
 
 	} else {
 		char message[70];
-		snprintf(message, sizeof(message) - 1, "Board on address %d on bus %d is not a pbr!", pbrAddress, communicator->getBusnumber());
+		snprintf(message, sizeof(message) - 1, "Board on address 0x%02x on bus %d is not a pbr!", pbrAddress, communicator->getBusnumber());
 		throw PicoBorgRevException(message);
 	}
 }
@@ -74,7 +74,7 @@ bool PicoBorgRev::checkId(I2CCommunicator *communicator, uint8_t pbrAddress)
 	} catch (const I2CException& e) {	
 
 	}
-	printf("Board not a pbr\n");
+	printf("No pbr on 0x%02x\n", pbrAddress);
 	return false;
 
 }
@@ -83,7 +83,8 @@ int main(int argc, char **argv)
 {
 	//printf("PicoBorgRev found on: 0x%02x \n", PicoBorgRevInitialise(true));
 	I2CCommunicator * com = new I2CCommunicator(); 
-	uint8_t address = PicoBorgRev::scanForAddress(1, com);
+	uint8_t address = PicoBorgRev::scanForAddress(0, com);
+	printf("Found 0x%02x", address);
 	PicoBorgRev *pbr = new PicoBorgRev(com, address);
 	delete pbr;
 	delete com;
