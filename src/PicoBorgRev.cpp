@@ -1,4 +1,5 @@
 #include "PicoBorgRev.hpp"
+#include <math.h>
 #include <errno.h>
 #include <fcntl.h>
 #include "I2CCommunicator.hpp"
@@ -76,8 +77,9 @@ bool PicoBorgRev::checkId(I2CCommunicator *communicator, uint8_t pbrAddress)
 
 }
 
-void PicoBorgRev::setMotor1(uint8_t power)
+void PicoBorgRev::setMotor1(float power)
 {
+	power *= PBR_PWM_MAX;
 	if (power < 0) {
 		power = power * -1;
 		this->bufOut[0] = PBR_COMMAND_SET_A_REV;
@@ -88,12 +90,13 @@ void PicoBorgRev::setMotor1(uint8_t power)
 	communicator->setTarget(pbrAddress);
 	//communicator->send(this->bufOut, 1);
 	power = (power > PBR_PWM_MAX) ? PBR_PWM_MAX : power;
-	this->bufOut[1] = (uint8_t) power;
+	this->bufOut[1] = (uint8_t) round(power);
 	communicator->send(this->bufOut, 2);
 }
 
-void PicoBorgRev::setMotor2(uint8_t power)
+void PicoBorgRev::setMotor2(float power)
 {
+	power *= PBR_PWM_MAX;
 	if (power < 0) {
 		power = power * -1;
 		this->bufOut[0] = PBR_COMMAND_SET_B_REV;
@@ -104,19 +107,20 @@ void PicoBorgRev::setMotor2(uint8_t power)
 	communicator->setTarget(pbrAddress);
 	//communicator->send(this->bufOut, 1);
 	power = (power > PBR_PWM_MAX) ? PBR_PWM_MAX : power;
-	this->bufOut[1] = (uint8_t) power;
+	this->bufOut[1] = (uint8_t) round(power);
 	communicator->send(this->bufOut, 2);
 }
 
-int16_t PicoBorgRev::getMotor(uint8_t command)
+float PicoBorgRev::getMotor(uint8_t command)
 {
 	this->bufOut[0] = command;
 	communicator->setTarget(pbrAddress);
 	communicator->send(this->bufOut, 1);
 	communicator->rec(this->bufIn, 3);
-	int res = bufIn[2];
-
+	float res = (float) bufIn[2] / (float) PBR_PWM_MAX;
+	printf("read: 0x%08x = %i/n", bufIn[2], bufIn[2]);
 	printf("return %i \n", bufIn[1]);
+	printf("rev/pos:  0x%08x =  %i/n", bufIn[1], bufIn[1]);
 	if (bufIn[1] == PBR_COMMAND_VALUE_FWD) {
 		return res;
 	} else if(bufIn[1] == PBR_COMMAND_VALUE_REV) {
@@ -136,12 +140,12 @@ int16_t PicoBorgRev::getMotor(uint8_t command)
 	}
 }
 
-int16_t PicoBorgRev::getMotor1()
+float PicoBorgRev::getMotor1()
 {
 	return getMotor(PBR_COMMAND_GET_A);
 }
 
-int16_t PicoBorgRev::getMotor2()
+float PicoBorgRev::getMotor2()
 {
 	return getMotor(PBR_COMMAND_GET_B);
 }
@@ -154,14 +158,14 @@ int main(int argc, char **argv)
 	uint8_t address = PicoBorgRev::scanForAddress(0, com);
 	printf("Found 0x%02x\n", address);
 	PicoBorgRev *pbr = new PicoBorgRev(com, address);
-	pbr->setMotor1(-100);
+	pbr->setMotor1(-0.5);
 	printf("Set motor 1\n");
 	sleep(3);
-	printf("Motor 1 running at %i\n", pbr->getMotor1());
-	pbr->setMotor2(100);
+	printf("Motor 1 running at %f\n", pbr->getMotor1());
+	pbr->setMotor2(.5);
 	printf("Set motor 2\n");
 	sleep(3);
-	printf("Motor 2 running at %i\n", pbr->getMotor2());
+	printf("Motor 2 running at %f\n", pbr->getMotor2());
 	pbr->setMotor1(0);
 	pbr->setMotor2(0);
 	delete pbr;

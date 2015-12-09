@@ -75,7 +75,7 @@ class PicoBorgRev {
 		 *
 		 * @param command command for the speed of motor 1 or 2
 		 */
-		int16_t getMotor(uint8_t command);
+		float getMotor(uint8_t command);
 
 	public:
 		PicoBorgRev(I2CCommunicator *communicator, uint8_t pbrAddress);
@@ -84,30 +84,29 @@ class PicoBorgRev {
 		/***** PicoBorg Reverse Functions *****/
 		/**************************************/
 		/**
-		 * All motor drive levels are from +PBR_PWM_MAX to -PBR_PWM_MAX
+		 * All motor drive levels are from -1 to 1
 		 * Positive values indicate forwards motion
 		 * Negative values indicate reverse motion
 		 * 0 indicates stationary
-		 * Values outside PBR_PWM_MAX will be capped to PBR_PWM_MAX (100%)
 		 */
 
 
 		/***** Motor functions *****/
 
 		// Sets the drive level for motor 2
-		void setMotor2(uint8_t power);
+		void setMotor2(float power);
 
 		// Gets the drive level for motor 2
-		int16_t getMotor2(void);
+		float getMotor2(void);
 
 		// Sets the drive level for motor 1
-		void setMotor1(uint8_t power);
+		void setMotor1(float power);
 
 		// Gets the drive level for motor 1
-		int16_t getMotor1(void);
+		float getMotor1(void);
 
 		// Sets the drive level for all motors
-		void PbrSetMotors(uint8_t power);
+		void PbrSetMotors(float power);
 
 		// Sets all motors to stopped, useful when ending a program
 		void PbrMotorsOff(void);
