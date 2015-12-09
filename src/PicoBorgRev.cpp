@@ -16,9 +16,6 @@
 #include <unistd.h>
 
 
-
-
-
 PicoBorgRev::PicoBorgRev(I2CCommunicator *communicator, uint8_t pbrAddress)
 {
 	if (PicoBorgRev::checkId(communicator, pbrAddress)) {
@@ -79,6 +76,76 @@ bool PicoBorgRev::checkId(I2CCommunicator *communicator, uint8_t pbrAddress)
 
 }
 
+void PicoBorgRev::setMotor1(uint8_t power)
+{
+	if (power < 0) {
+		power = power * -1;
+		this->bufOut[0] = PBR_COMMAND_SET_A_REV;
+	} else {
+		this->bufOut[0] = PBR_COMMAND_SET_A_FWD;
+	}
+
+	communicator->setTarget(pbrAddress);
+	communicator->send(this->bufOut, 1);
+	power = (power > PBR_PWM_MAX) ? PBR_PWM_MAX : power;
+	this->bufOut[0] = (uint8_t) power;
+	communicator->send(this->bufOut, 1);
+}
+
+void PicoBorgRev::setMotor2(uint8_t power)
+{
+	if (power < 0) {
+		power = power * -1;
+		this->bufOut[0] = PBR_COMMAND_SET_B_REV;
+	} else {
+		this->bufOut[0] = PBR_COMMAND_SET_B_FWD;
+	}
+
+	communicator->setTarget(pbrAddress);
+	communicator->send(this->bufOut, 1);
+	power = (power > PBR_PWM_MAX) ? PBR_PWM_MAX : power;
+	this->bufOut[0] = (uint8_t) power;
+	communicator->send(this->bufOut, 1);
+}
+
+uint8_t PicoBorgRev::getMotor(uint8_t command)
+{
+	this->bufOut[0] = command;
+	communicator->setTarget(pbrAddress);
+	communicator->send(this->bufOut, 1);
+	communicator->rec(this->bufIn, 3);
+	int res = bufIn[2];
+
+	if (bufIn[1] == PBR_COMMAND_VALUE_FWD) {
+		return res;
+	} else if(bufIn[1] == PBR_COMMAND_VALUE_REV) {
+		return res * -1;
+	} else {
+		char message[70];
+		if (command == PBR_COMMAND_GET_A) {
+			snprintf(message, sizeof(message) - 1, "Failed to read the status of motor 1");
+		} else if (command == PBR_COMMAND_GET_B) {
+			snprintf(message, sizeof(message) - 1, "Failed to read the status of motor 2");
+		} else {
+			snprintf(message, sizeof(message) - 1, "Send wrong command");
+		}
+
+
+		throw PicoBorgRevException(message);
+	}
+}
+
+uint8_t PicoBorgRev::getMotor1()
+{
+	return getMotor(PBR_COMMAND_GET_A);
+}
+
+uint8_t PicoBorgRev::getMotor2()
+{
+	return getMotor(PBR_COMMAND_GET_B);
+}
+
+
 int main(int argc, char **argv)
 {
 	//printf("PicoBorgRev found on: 0x%02x \n", PicoBorgRevInitialise(true));
@@ -86,6 +153,16 @@ int main(int argc, char **argv)
 	uint8_t address = PicoBorgRev::scanForAddress(0, com);
 	printf("Found 0x%02x", address);
 	PicoBorgRev *pbr = new PicoBorgRev(com, address);
+	pbr->setMotor1(100);
+	printf("Set motor 1");
+	sleep(10);
+	printf("Motor 1 running at %i", pbr->getMotor1());
+	pbr->setMotor2(100);
+	printf("Set motor 2");
+	sleep(10);
+	printf("Motor 2 running at %i", pbr->getMotor2());
+	pbr->setMotor1(0);
+	pbr->setMotor2(0);
 	delete pbr;
 	delete com;
 }
