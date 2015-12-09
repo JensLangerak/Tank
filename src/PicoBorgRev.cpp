@@ -86,10 +86,10 @@ void PicoBorgRev::setMotor1(uint8_t power)
 	}
 
 	communicator->setTarget(pbrAddress);
-	communicator->send(this->bufOut, 1);
+	//communicator->send(this->bufOut, 1);
 	power = (power > PBR_PWM_MAX) ? PBR_PWM_MAX : power;
-	this->bufOut[0] = (uint8_t) power;
-	communicator->send(this->bufOut, 1);
+	this->bufOut[1] = (uint8_t) power;
+	communicator->send(this->bufOut, 2);
 }
 
 void PicoBorgRev::setMotor2(uint8_t power)
@@ -102,13 +102,13 @@ void PicoBorgRev::setMotor2(uint8_t power)
 	}
 
 	communicator->setTarget(pbrAddress);
-	communicator->send(this->bufOut, 1);
+	//communicator->send(this->bufOut, 1);
 	power = (power > PBR_PWM_MAX) ? PBR_PWM_MAX : power;
-	this->bufOut[0] = (uint8_t) power;
-	communicator->send(this->bufOut, 1);
+	this->bufOut[1] = (uint8_t) power;
+	communicator->send(this->bufOut, 2);
 }
 
-uint8_t PicoBorgRev::getMotor(uint8_t command)
+int16_t PicoBorgRev::getMotor(uint8_t command)
 {
 	this->bufOut[0] = command;
 	communicator->setTarget(pbrAddress);
@@ -116,6 +116,7 @@ uint8_t PicoBorgRev::getMotor(uint8_t command)
 	communicator->rec(this->bufIn, 3);
 	int res = bufIn[2];
 
+	printf("return %i \n", bufIn[1]);
 	if (bufIn[1] == PBR_COMMAND_VALUE_FWD) {
 		return res;
 	} else if(bufIn[1] == PBR_COMMAND_VALUE_REV) {
@@ -135,12 +136,12 @@ uint8_t PicoBorgRev::getMotor(uint8_t command)
 	}
 }
 
-uint8_t PicoBorgRev::getMotor1()
+int16_t PicoBorgRev::getMotor1()
 {
 	return getMotor(PBR_COMMAND_GET_A);
 }
 
-uint8_t PicoBorgRev::getMotor2()
+int16_t PicoBorgRev::getMotor2()
 {
 	return getMotor(PBR_COMMAND_GET_B);
 }
@@ -151,16 +152,16 @@ int main(int argc, char **argv)
 	//printf("PicoBorgRev found on: 0x%02x \n", PicoBorgRevInitialise(true));
 	I2CCommunicator * com = new I2CCommunicator(); 
 	uint8_t address = PicoBorgRev::scanForAddress(0, com);
-	printf("Found 0x%02x", address);
+	printf("Found 0x%02x\n", address);
 	PicoBorgRev *pbr = new PicoBorgRev(com, address);
-	pbr->setMotor1(100);
-	printf("Set motor 1");
-	sleep(10);
-	printf("Motor 1 running at %i", pbr->getMotor1());
+	pbr->setMotor1(-100);
+	printf("Set motor 1\n");
+	sleep(3);
+	printf("Motor 1 running at %i\n", pbr->getMotor1());
 	pbr->setMotor2(100);
-	printf("Set motor 2");
-	sleep(10);
-	printf("Motor 2 running at %i", pbr->getMotor2());
+	printf("Set motor 2\n");
+	sleep(3);
+	printf("Motor 2 running at %i\n", pbr->getMotor2());
 	pbr->setMotor1(0);
 	pbr->setMotor2(0);
 	delete pbr;

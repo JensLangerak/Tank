@@ -75,7 +75,7 @@ class PicoBorgRev {
 		 *
 		 * @param command command for the speed of motor 1 or 2
 		 */
-		uint8_t getMotor(uint8_t command);
+		int16_t getMotor(uint8_t command);
 
 	public:
 		PicoBorgRev(I2CCommunicator *communicator, uint8_t pbrAddress);
@@ -98,13 +98,13 @@ class PicoBorgRev {
 		void setMotor2(uint8_t power);
 
 		// Gets the drive level for motor 2
-		uint8_t getMotor2(void);
+		int16_t getMotor2(void);
 
 		// Sets the drive level for motor 1
 		void setMotor1(uint8_t power);
 
 		// Gets the drive level for motor 1
-		uint8_t getMotor1(void);
+		int16_t getMotor1(void);
 
 		// Sets the drive level for all motors
 		void PbrSetMotors(uint8_t power);
