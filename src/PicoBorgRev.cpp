@@ -77,50 +77,54 @@ bool PicoBorgRev::checkId(I2CCommunicator *communicator, uint8_t pbrAddress)
 
 }
 
-void PicoBorgRev::setMotor1(float power)
+void PicoBorgRev::send(uint8_t size)
+{
+	communicator->setTarget(pbrAddress);
+	communicator->send(this->bufOut, size);
+}
+
+void PicoBorgRev::rec(uint8_t send, uint8_t rec)
+{
+	communicator->setTarget(pbrAddress);
+	communicator->send(this->bufOut, send);
+	communicator->rec(this->bufIn, rec);
+}
+
+void PicoBorgRev::setMotor(uint8_t command, float power)
 {
 	power *= PBR_PWM_MAX;
+
+	power = (power > PBR_PWM_MAX) ? PBR_PWM_MAX : power;
+	this->bufOut[0] = command;
+	this->bufOut[1] = (uint8_t) round(power);
+	this->send(2);
+}
+
+void PicoBorgRev::setMotor1(float power)
+{
 	if (power < 0) {
 		power = power * -1;
-		this->bufOut[0] = PBR_COMMAND_SET_A_REV;
+		setMotor(PBR_COMMAND_SET_A_REV, power);
 	} else {
-		this->bufOut[0] = PBR_COMMAND_SET_A_FWD;
+		setMotor(PBR_COMMAND_SET_A_FWD,power);
 	}
-
-	communicator->setTarget(pbrAddress);
-	//communicator->send(this->bufOut, 1);
-	power = (power > PBR_PWM_MAX) ? PBR_PWM_MAX : power;
-	this->bufOut[1] = (uint8_t) round(power);
-	communicator->send(this->bufOut, 2);
 }
 
 void PicoBorgRev::setMotor2(float power)
 {
-	power *= PBR_PWM_MAX;
 	if (power < 0) {
 		power = power * -1;
-		this->bufOut[0] = PBR_COMMAND_SET_B_REV;
+		setMotor(PBR_COMMAND_SET_B_REV, power);
 	} else {
-		this->bufOut[0] = PBR_COMMAND_SET_B_FWD;
+		setMotor(PBR_COMMAND_SET_B_FWD,power);
 	}
-
-	communicator->setTarget(pbrAddress);
-	//communicator->send(this->bufOut, 1);
-	power = (power > PBR_PWM_MAX) ? PBR_PWM_MAX : power;
-	this->bufOut[1] = (uint8_t) round(power);
-	communicator->send(this->bufOut, 2);
 }
 
 float PicoBorgRev::getMotor(uint8_t command)
 {
 	this->bufOut[0] = command;
-	communicator->setTarget(pbrAddress);
-	communicator->send(this->bufOut, 1);
-	communicator->rec(this->bufIn, 3);
+	this->rec(1, 3);
 	float res = (float) bufIn[2] / (float) PBR_PWM_MAX;
-	printf("read: 0x%08x = %i/n", bufIn[2], bufIn[2]);
-	printf("return %i \n", bufIn[1]);
-	printf("rev/pos:  0x%08x =  %i/n", bufIn[1], bufIn[1]);
 	if (bufIn[1] == PBR_COMMAND_VALUE_FWD) {
 		return res;
 	} else if(bufIn[1] == PBR_COMMAND_VALUE_REV) {
@@ -150,6 +154,22 @@ float PicoBorgRev::getMotor2()
 	return getMotor(PBR_COMMAND_GET_B);
 }
 
+void PicoBorgRev::setMotors(float power)
+{
+	if (power < 0) {
+		power = power * -1;
+		setMotor(PBR_COMMAND_SET_ALL_REV, power);
+	} else {
+		setMotor(PBR_COMMAND_SET_ALL_FWD,power);
+	}
+}
+
+void PicoBorgRev::motorsOff(void)
+{	
+	this->bufOut[0] = PBR_COMMAND_ALL_OFF;
+	this->send(1);
+}
+
 
 int main(int argc, char **argv)
 {
@@ -159,15 +179,18 @@ int main(int argc, char **argv)
 	printf("Found 0x%02x\n", address);
 	PicoBorgRev *pbr = new PicoBorgRev(com, address);
 	pbr->setMotor1(-0.5);
-	printf("Set motor 1\n");
 	sleep(3);
-	printf("Motor 1 running at %f\n", pbr->getMotor1());
 	pbr->setMotor2(.5);
-	printf("Set motor 2\n");
 	sleep(3);
-	printf("Motor 2 running at %f\n", pbr->getMotor2());
-	pbr->setMotor1(0);
-	pbr->setMotor2(0);
+	printf("motor 1: %f \n", pbr->getMotor1());
+	printf("motor 2: %f \n", pbr->getMotor2());
+	pbr->setMotors(1);
+	sleep(3);
+	printf("motor 1: %f \n", pbr->getMotor1());
+	printf("motor 2: %f \n", pbr->getMotor1());
+	pbr->motorsOff();
+	printf("motor 1: %f \n", pbr->getMotor1());
+	printf("motor 2: %f \n", pbr->getMotor2());
 	delete pbr;
 	delete com;
 }

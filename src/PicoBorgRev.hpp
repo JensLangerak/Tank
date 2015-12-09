@@ -77,6 +77,29 @@ class PicoBorgRev {
 		 */
 		float getMotor(uint8_t command);
 
+		/**
+		 * Set the motor speed
+		 *
+		 * @paran command that specifies the motor and direction
+		 */
+		void setMotor(uint8_t command, float power);
+
+		/**
+		 * Send size bytes. Data must be in bufout
+		 *
+		 * @param size nymber of bytes to send
+		 */
+		void send(uint8_t size);
+
+		/**
+		 * send a read command and then read the data
+		 * store data in bufIn
+		 *
+		 * @param send nunber of bytes to send
+		 * @param rec number of bytes recieved
+		 */
+		void rec(uint8_t send, uint8_t rec);
+
 	public:
 		PicoBorgRev(I2CCommunicator *communicator, uint8_t pbrAddress);
 
@@ -106,10 +129,10 @@ class PicoBorgRev {
 		float getMotor1(void);
 
 		// Sets the drive level for all motors
-		void PbrSetMotors(float power);
+		void setMotors(float power);
 
 		// Sets all motors to stopped, useful when ending a program
-		void PbrMotorsOff(void);
+		void motorsOff(void);
 
 		/***** General functions *****/
 
