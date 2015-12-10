@@ -188,6 +188,8 @@ include_directories(
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
 #link_directories(/usr/local/lib)
-add_executable(mover src/mover.cpp)
-target_link_libraries(mover ${catkin_LIBRARIES} wiringPi pthread)
+#add_executable(mover src/mover.cpp)
+add_executable(pbr src/I2CCommunicator src/PicoBorgRev)
+target_link_libraries(pbr ${catkin_LIBRARIES} pthread)
+add_definitions(-std=c++11)
 #add_definitions(-lwiringPi)
