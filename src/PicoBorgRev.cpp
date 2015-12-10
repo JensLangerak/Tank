@@ -223,6 +223,25 @@ bool PicoBorgRev::getCommsFailsafe(void)
 	}
 }
 
+bool PicoBorgRev::getDriveFault(void)
+{
+	this->bufOut[0] = PBR_COMMAND_GET_DRIVE_FAULT;
+	this->rec(1,2);
+	
+	switch (bufIn[1]) {
+		case PBR_COMMAND_VALUE_ON:
+			return true;
+			break;
+		case PBR_COMMAND_VALUE_OFF:
+			return false;
+			break;
+		default:
+			char message[70];
+			snprintf(message, sizeof(message) - 1, "Unexpected response getDriveFault: %d", bufIn[1]);
+			throw PicoBorgRevException(message);
+	}
+}
+
 int main(int argc, char **argv)
 {
 	//printf("PicoBorgRev found on: 0x%02x \n", PicoBorgRevInitialise(true));
@@ -250,22 +269,27 @@ int main(int argc, char **argv)
 	sleep(3);
 	pbr->setLed(false);
 	printf("LED: %s \n", pbr->getLed() ? "true" : "false");
+	printf("DriveFault: %s \n", pbr->getDriveFault() ? "true" : "false");
 	printf("FAILSAFE: %s \n", pbr->getCommsFailsafe() ? "true" : "false");
 	sleep(3);
 	pbr->setCommsFailsafe(true);
+	printf("DriveFault: %s \n", pbr->getDriveFault() ? "true" : "false");
 	printf("FAILSAFE: %s \n", pbr->getCommsFailsafe() ? "true" : "false");
 	pbr->setMotors(1);
 	sleep(3);
+	printf("DriveFault: %s \n", pbr->getDriveFault() ? "true" : "false");
 	printf("2 \n");
-	for (int i = 0; i < 30; i++)
+	for (int i = 0; i < 60; i++)
 	{
 		pbr->setMotors(1);
-		usleep(100);
+		usleep(100000);
 	}
+	printf("DriveFault: %s \n", pbr->getDriveFault() ? "true" : "false");
 	pbr->setCommsFailsafe(false);
 	printf("FAILSAFE: %s \n", pbr->getCommsFailsafe() ? "true" : "false");
 	pbr->setMotors(1);
 	sleep(3);
+	printf("DriveFault: %s \n", pbr->getDriveFault() ? "true" : "false");
 	pbr->motorsOff();
 		delete pbr;
 	delete com;

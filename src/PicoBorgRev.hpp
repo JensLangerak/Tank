@@ -186,7 +186,7 @@ class PicoBorgRev {
 		// Note that the fault state may be true at power up, this is normal and should clear when both motors have been driven
 		// If there are no faults but you cannot make your motors move check PbrGetEpo to see if the safety switch has been tripped
 		// For more details check the website at www.piborg.org/picoborgrev and double check the wiring instructions
-		bool PbrGetDriveFault(void);
+		bool getDriveFault(void);
 
 		/***** Advanced functions *****/
 
