@@ -170,6 +170,58 @@ void PicoBorgRev::motorsOff(void)
 	this->send(1);
 }
 
+void PicoBorgRev::setLed(bool state)
+{
+	this->bufOut[0] = PBR_COMMAND_SET_LED;
+	this->bufOut[1] = (state) ? PBR_COMMAND_VALUE_ON : PBR_COMMAND_VALUE_OFF;
+	this->send(2);
+}
+
+
+bool PicoBorgRev::getLed(void)
+{
+	this->bufOut[0] = PBR_COMMAND_GET_LED;
+	this->rec(1,2);
+	
+	switch (bufIn[1]) {
+		case PBR_COMMAND_VALUE_ON:
+			return true;
+			break;
+		case PBR_COMMAND_VALUE_OFF:
+			return false;
+			break;
+		default:
+			char message[70];
+			snprintf(message, sizeof(message) - 1, "Unexpected response getLed: %d", bufIn[1]);
+			throw PicoBorgRevException(message);
+	}
+}	
+
+void PicoBorgRev::setCommsFailsafe(bool state)
+{
+	this->bufOut[0] = PBR_COMMAND_SET_FAILSAFE;
+	this->bufOut[1] = (state) ? PBR_COMMAND_VALUE_ON : PBR_COMMAND_VALUE_OFF;
+	this->send(2);
+}
+
+bool PicoBorgRev::getCommsFailsafe(void)
+{
+	this->bufOut[0] = PBR_COMMAND_GET_FAILSAFE;
+	this->rec(1,2);
+	
+	switch (bufIn[1]) {
+		case PBR_COMMAND_VALUE_ON:
+			return true;
+			break;
+		case PBR_COMMAND_VALUE_OFF:
+			return false;
+			break;
+		default:
+			char message[70];
+			snprintf(message, sizeof(message) - 1, "Unexpected response getFailsafe: %d", bufIn[1]);
+			throw PicoBorgRevException(message);
+	}
+}
 
 int main(int argc, char **argv)
 {
@@ -191,6 +243,30 @@ int main(int argc, char **argv)
 	pbr->motorsOff();
 	printf("motor 1: %f \n", pbr->getMotor1());
 	printf("motor 2: %f \n", pbr->getMotor2());
-	delete pbr;
+	printf("LED: %s \n", pbr->getLed() ? "true" : "false");
+	sleep(3);
+	pbr->setLed(true);
+	printf("LED: %s \n", pbr->getLed() ? "true" : "false");
+	sleep(3);
+	pbr->setLed(false);
+	printf("LED: %s \n", pbr->getLed() ? "true" : "false");
+	printf("FAILSAFE: %s \n", pbr->getCommsFailsafe() ? "true" : "false");
+	sleep(3);
+	pbr->setCommsFailsafe(true);
+	printf("FAILSAFE: %s \n", pbr->getCommsFailsafe() ? "true" : "false");
+	pbr->setMotors(1);
+	sleep(3);
+	printf("2 \n");
+	for (int i = 0; i < 30; i++)
+	{
+		pbr->setMotors(1);
+		usleep(100);
+	}
+	pbr->setCommsFailsafe(false);
+	printf("FAILSAFE: %s \n", pbr->getCommsFailsafe() ? "true" : "false");
+	pbr->setMotors(1);
+	sleep(3);
+	pbr->motorsOff();
+		delete pbr;
 	delete com;
 }

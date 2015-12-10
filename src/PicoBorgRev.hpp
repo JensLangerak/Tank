@@ -140,10 +140,10 @@ class PicoBorgRev {
 		static bool checkId(I2CCommunicator *communicator, uint8_t pbrAddress);
 
 		// Sets the current state of the LED, false for off, true for on
-		void PbrSetLed(bool state);
+		void setLed(bool state);
 
 		// Reads the current state of the LED, false for off, true for on
-		bool PbrGetLed(void);
+		bool getLed(void);
 
 
 		// Resets the EPO latch state, use to allow movement again after the EPO has been tripped
@@ -165,11 +165,11 @@ class PicoBorgRev {
 		// The failsafe will turn the motors off unless it is commanded at least once every 1/4 of a second
 		// Set to True to enable this failsafe, set to False to disable this failsafe
 		// The failsafe is disabled at power on
-		void PbrSetCommsFailsafe(bool state);
+		void setCommsFailsafe(bool state);
 
 		// Read the current system state of the communications failsafe, true for enabled, false for disabled
 		// The failsafe will turn the motors off unless it is commanded at least once every 1/4 of a second
-		bool PbrGetCommsFailsafe(void);
+		bool getCommsFailsafe(void);
 
 		// Reads the system drive fault state, False for no problems, True for a fault has been detected
 		// Faults may indicate power problems, such as under-voltage (not enough power), and may be cleared by setting a lower drive power
