@@ -20,7 +20,7 @@ I2CCommunicator::I2CCommunicator(int busNumber, bool tryOtherBus)
 {
 	this->busNumber = busNumber;
 
-	init(tryOtherBus);	
+	init(tryOtherBus);
 }
 
 int I2CCommunicator::init(bool tryOtherBus)

@@ -47,8 +47,8 @@ class I2CCommunicator {
 		 * @return 0 if succeded.
 		 * @throws I2CException when it fails to set the target.
 		 */
-		int setTarget(uint8_t targetAddress);	
-		
+		int setTarget(uint8_t targetAddress);
+
 		/**
 		 * Send a message to the selected target (set the target with setTarget).
 		 *

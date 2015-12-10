@@ -23,7 +23,7 @@ PicoBorgRev::PicoBorgRev(I2CCommunicator *communicator, uint8_t pbrAddress)
 		printf("PBR board found on 0x%02x\n", pbrAddress);
 		this->communicator = communicator;
 		this->pbrAddress = pbrAddress;
-		
+
 		//clear buffers
 		for (int i = 0; i < BUFFER_MAX; i++) {
 			bufIn[i] = 0x0;
@@ -69,7 +69,7 @@ bool PicoBorgRev::checkId(I2CCommunicator *communicator, uint8_t pbrAddress)
 				return (bufIn[1] == PBR_I2C_ID_PICOBORG_REV);
 		      }
 		}
-	} catch (const I2CException& e) {	
+	} catch (const I2CException& e) {
 
 	}
 	printf("No pbr on 0x%02x\n", pbrAddress);
@@ -165,7 +165,7 @@ void PicoBorgRev::setMotors(float power)
 }
 
 void PicoBorgRev::motorsOff(void)
-{	
+{
 	this->bufOut[0] = PBR_COMMAND_ALL_OFF;
 	this->send(1);
 }
@@ -182,7 +182,7 @@ bool PicoBorgRev::getLed(void)
 {
 	this->bufOut[0] = PBR_COMMAND_GET_LED;
 	this->rec(1,2);
-	
+
 	switch (bufIn[1]) {
 		case PBR_COMMAND_VALUE_ON:
 			return true;
@@ -195,7 +195,7 @@ bool PicoBorgRev::getLed(void)
 			snprintf(message, sizeof(message) - 1, "Unexpected response getLed: %d", bufIn[1]);
 			throw PicoBorgRevException(message);
 	}
-}	
+}
 
 void PicoBorgRev::setCommsFailsafe(bool state)
 {
@@ -208,7 +208,7 @@ bool PicoBorgRev::getCommsFailsafe(void)
 {
 	this->bufOut[0] = PBR_COMMAND_GET_FAILSAFE;
 	this->rec(1,2);
-	
+
 	switch (bufIn[1]) {
 		case PBR_COMMAND_VALUE_ON:
 			return true;
@@ -227,7 +227,7 @@ bool PicoBorgRev::getDriveFault(void)
 {
 	this->bufOut[0] = PBR_COMMAND_GET_DRIVE_FAULT;
 	this->rec(1,2);
-	
+
 	switch (bufIn[1]) {
 		case PBR_COMMAND_VALUE_ON:
 			return true;

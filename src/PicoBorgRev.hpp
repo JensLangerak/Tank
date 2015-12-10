@@ -152,7 +152,7 @@ class PicoBorgRev {
 		// Reads the system EPO latch state.
 		// If false the EPO has not been tripped, and movement is allowed.
 		// If true the EPO has been tripped, movement is disabled if the EPO is not ignored (see PbrSetEpoIgnore)
-		//     Movement can be re-enabled by calling PbrResetEpo. 
+		//     Movement can be re-enabled by calling PbrResetEpo.
 		bool PbrGetEpo(void);
 
 		// Sets the system to ignore or use the EPO latch, set to false if you have an EPO switch, true if you do not

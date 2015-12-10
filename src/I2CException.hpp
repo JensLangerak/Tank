@@ -14,7 +14,7 @@ class I2CException : public std::exception
 		I2CException(void) :
 			I2CException("Error") {};
 		~I2CException(void) throw() {};
-		const char *what() const throw() { 
+		const char *what() const throw() {
 			std::string preMessage = "I2C ERROR: ";
 			preMessage.append(errMsg);
 			return preMessage.c_str();

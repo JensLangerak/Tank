@@ -14,7 +14,7 @@ class PicoBorgRevException : public std::exception
 		PicoBorgRevException(void) :
 			PicoBorgRevException("Error") {};
 		~PicoBorgRevException(void) throw() {};
-		const char *what() const throw() { 
+		const char *what() const throw() {
 			std::string preMessage = "PBR ERROR: ";
 			preMessage.append(errMsg);
 			return preMessage.c_str();
